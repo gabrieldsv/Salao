@@ -3,72 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamentos do Salão</title>
+    <title>Salão de Beleza - Home</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+    <header>
+        <h1>Salão de Beleza</h1>
+        <nav>
+            <a href="agendar.html" class="btn">Agendar</a>
+        </nav>
+    </header>
     <div class="container">
-        <h1>Agendamentos do Salão</h1>
-        
-        <!-- Dashboard -->
         <section id="dashboard">
             <h2>Dashboard</h2>
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <h3>Hoje</h3>
                     <ul id="agendamentos-hoje"></ul>
+                    <a href="detalhes.html?categoria=hoje" class="btn mostrar-mais" id="mostrar-mais-hoje" style="display: none;">Mostrar Mais</a>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Amanhã</h3>
+                    <ul id="agendamentos-amanha"></ul>
+                    <a href="detalhes.html?categoria=amanha" class="btn mostrar-mais" id="mostrar-mais-amanha" style="display: none;">Mostrar Mais</a>
                 </div>
                 <div class="dashboard-card">
                     <h3>Semana que Vem</h3>
                     <ul id="agendamentos-semana"></ul>
+                    <a href="detalhes.html?categoria=semana" class="btn mostrar-mais" id="mostrar-mais-semana" style="display: none;">Mostrar Mais</a>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Este Mês</h3>
+                    <ul id="agendamentos-mes"></ul>
+                    <a href="detalhes.html?categoria=mes" class="btn mostrar-mais" id="mostrar-mais-mes" style="display: none;">Mostrar Mais</a>
                 </div>
             </div>
         </section>
-
-        <!-- Formulário para cadastrar/editar agendamentos -->
-        <section id="cadastro">
-            <h2 id="form-title">Novo Agendamento</h2>
-            <form id="form-agendamento">
-                <input type="hidden" id="edit-index">
-                <label for="nome">Nome da Cliente:</label>
-                <input type="text" id="nome" placeholder="Digite o nome" required>
-                
-                <label for="telefone">Telefone:</label>
-                <input type="text" id="telefone" placeholder="(11) 99999-9999" required>
-                
-                <label for="data">Data:</label>
-                <input type="text" id="data" placeholder="dd/mm/aaaa" required>
-                
-                <label for="horario">Horário:</label>
-                <input type="text" id="horario" placeholder="hh:mm" required>
-                
-                <label>Serviços:</label>
-                <div id="servicos-checkboxes"></div>
-                
-                <label for="recorrencia">Recorrência (semanas):</label>
-                <input type="number" id="recorrencia" min="0" max="52" value="0" placeholder="0 = sem recorrência">
-                
-                <button type="submit" id="btn-salvar">Cadastrar</button>
-            </form>
-        </section>
-
-        <!-- Gerenciar serviços -->
-        <section id="gerenciar-servicos">
-            <h2>Gerenciar Serviços</h2>
-            <input type="text" id="novo-servico" placeholder="Digite um novo serviço">
-            <button onclick="adicionarServico()">Adicionar Serviço</button>
-            <ul id="lista-servicos"></ul>
-        </section>
-
-        <!-- Lista dos agendamentos -->
-        <section id="lista-agendamentos">
-            <h2>Agendamentos Cadastrados</h2>
-            <input type="text" id="busca" placeholder="Buscar por nome, telefone ou serviço">
-            <ul id="agendamentos"></ul>
-        </section>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
