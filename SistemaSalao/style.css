@@ -32,14 +32,14 @@ body {
     z-index: 1000;
 }
 
-.sidebar .logo h1 {
-    font-size: 24px;
-    font-weight: 500;
+.sidebar .logo {
     margin-bottom: 24px;
 }
 
-.sidebar .logo span {
-    color: #03DAC6;
+.logo-img {
+    max-width: 100%; /* Garante que o logo se ajuste à largura da sidebar */
+    height: auto;
+    display: block;
 }
 
 .sidebar nav {
@@ -402,7 +402,7 @@ td .delete-btn:hover {
     background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
-    z-index: 2000; /* Aumentado para garantir que fique acima de outros elementos */
+    z-index: 2000;
 }
 
 .modal-content {
@@ -412,14 +412,9 @@ td .delete-btn:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 400px;
-    margin: auto; /* Centraliza horizontalmente */
-    position: relative; /* Permite posicionamento absoluto para o close */
-}
-
-/* Centralização vertical e horizontal ajustada */
-.modal-content {
+    margin: auto;
+    position: relative;
     transform: translate(-50%, -50%);
-    position: absolute;
     top: 50%;
     left: 50%;
 }
@@ -453,6 +448,10 @@ td .delete-btn:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
+}
+
+.auth-form .logo {
+    margin-bottom: 16px;
 }
 
 .auth-form h3 {
@@ -586,6 +585,10 @@ td .delete-btn:hover {
 
     .modal-content {
         width: 80%;
-        max-width: 300px; /* Reduzido para telas pequenas */
+        max-width: 300px;
+    }
+
+    .logo-img {
+        max-width: 150px; /* Reduz o tamanho do logo em telas pequenas */
     }
 }
