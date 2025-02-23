@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Salão de Beleza</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="dashboard">
+    <div class="dashboard" id="dashboard">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo">
@@ -32,16 +34,63 @@
                 </div>
             </header>
 
-            <!-- Total de Agendamentos -->
-            <div class="total-agendamentos">
-                <h3>Total de Agendamentos</h3>
-                <p id="total-agendamentos">0</p>
+            <!-- Cards de Resumo -->
+            <div class="cards-container">
+                <div class="card" onclick="window.location.href='detalhes.html?filtro=hoje'">
+                    <h3>Hoje</h3>
+                    <p id="agendamentos-hoje">0</p>
+                </div>
+                <div class="card" onclick="window.location.href='detalhes.html?filtro=amanha'">
+                    <h3>Amanhã</h3>
+                    <p id="agendamentos-amanha">0</p>
+                </div>
+                <div class="card" onclick="window.location.href='detalhes.html?filtro=semana'">
+                    <h3>Semana</h3>
+                    <p id="agendamentos-semana">0</p>
+                </div>
+                <div class="card" onclick="window.location.href='detalhes.html?filtro=mes'">
+                    <h3>Mês</h3>
+                    <p id="agendamentos-mes">0</p>
+                </div>
             </div>
 
-            <!-- Lista de Todos os Agendamentos -->
-            <div class="todos-agendamentos">
-                <h3>Todos os Agendamentos</h3>
-                <ul id="todos-agendamentos-lista"></ul>
+            <!-- Gráficos -->
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>Agendamentos por Dia</h3>
+                    <canvas id="agendamentosChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>Serviços Populares</h3>
+                    <canvas id="servicosChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Lista de Agendamentos -->
+            <div class="agendamentos-table">
+                <h3>Agendamentos</h3>
+                <div class="table-controls">
+                    <select id="filtro-periodo" onchange="filtrarTabela()">
+                        <option value="todos">Todos</option>
+                        <option value="hoje">Hoje</option>
+                        <option value="amanha">Amanhã</option>
+                        <option value="semana">Semana</option>
+                        <option value="mes">Mês</option>
+                    </select>
+                    <input type="text" id="busca-agendamento" placeholder="Pesquisar por cliente ou serviço" oninput="filtrarTabela()">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Serviços</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agendamentos-tbody"></tbody>
+                </table>
             </div>
         </div>
     </div>

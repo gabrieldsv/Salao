@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salão de Beleza - Login</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Salão de Beleza</h1>
-    </header>
-    <div class="container">
-        <section id="login">
-            <h2>Login</h2>
+    <div class="main-content" style="margin-left: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+        <div class="agendamentos-table" style="max-width: 400px; width: 100%;">
+            <h3 style="text-align: center;">Login</h3>
             <form id="form-login">
                 <label for="email">E-mail:</label>
                 <input type="email" id="email" placeholder="Digite seu e-mail" required>
@@ -21,8 +19,8 @@
                 <input type="password" id="senha" placeholder="Digite sua senha" required>
                 <button type="submit" id="btn-login">Entrar</button>
             </form>
-            <p>Não tem uma conta? <a href="registro.html">Registre-se</a></p>
-        </section>
+            <p style="text-align: center; margin-top: 16px;">Não tem uma conta? <a href="registro.html" style="color: #6200EA;">Registre-se</a></p>
+        </div>
     </div>
     <script src="config.js"></script>
     <script src="script.js"></script>
