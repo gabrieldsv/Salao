@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendar - Salão de Beleza</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Biblioteca inputmask -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 </head>
@@ -29,9 +28,9 @@
         <div class="main-content">
             <!-- Header -->
             <header>
-                <h2>Agendar</h2>
+                <h2 id="form-title">Novo Agendamento</h2>
                 <div class="user-info">
-                    <span>👤 Gabriel</span>
+                    <span id="user-name">👤 Gabriel</span>
                 </div>
             </header>
 
@@ -39,31 +38,23 @@
             <form id="form-agendamento">
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" placeholder="Digite o nome" required>
-
                 <label for="telefone">Telefone:</label>
                 <input type="text" id="telefone" placeholder="(00) 0 0000-0000" required>
-
                 <label for="data">Data:</label>
                 <input type="date" id="data" required>
-
                 <label for="horario">Horário:</label>
                 <input type="time" id="horario" required>
-
                 <label>Serviços:</label>
-                <div id="servicos-checkboxes">
-                    <!-- Checkboxes serão preenchidos dinamicamente -->
-                </div>
-
-                <!-- Botão para adicionar novo serviço -->
+                <div id="servicos-checkboxes"></div>
+                <input type="hidden" id="edit-index">
                 <button type="button" id="btn-adicionar-servico">➕ Adicionar Serviço</button>
-
-                <button type="submit">Agendar</button>
+                <button type="submit" id="btn-salvar">Salvar</button>
             </form>
 
             <!-- Modal para adicionar novo serviço -->
             <div id="modal-servico" class="modal">
                 <div class="modal-content">
-                    <span class="close">&times;</span>
+                    <span class="close">×</span>
                     <h3>Adicionar Novo Serviço</h3>
                     <form id="form-novo-servico">
                         <label for="novo-servico">Nome do Serviço:</label>
@@ -75,136 +66,7 @@
         </div>
     </div>
 
-    <!-- Script para carregar serviços e salvar agendamentos -->
-    <script type="module">
-        // Importa o Supabase
-        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-        // Configurações do Supabase
-        const SUPABASE_URL = 'https://zxxgjzqohbdtuofyenmt.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGdqenFvaGJkdHVvZnllbm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTEyOTIsImV4cCI6MjA1NTgyNzI5Mn0.bnOyPVj0xTVI1YgZDNGm54-Pl72MoOjcqBLVg1K3kl0';
-
-        // Inicializa o cliente Supabase
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Função para carregar serviços
-        async function carregarServicos() {
-            const { data: servicos, error } = await supabase
-                .from('servicos')
-                .select('*');
-
-            if (error) {
-                console.error('Erro ao carregar serviços:', error.message);
-                return;
-            }
-
-            const container = document.getElementById('servicos-checkboxes');
-            container.innerHTML = ''; // Limpa o container antes de adicionar os checkboxes
-
-            servicos.forEach(servico => {
-                const label = document.createElement('label');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = servico.nome;
-                label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(servico.nome));
-                container.appendChild(label);
-            });
-        }
-
-        // Função para salvar agendamento
-        async function salvarAgendamento(event) {
-            event.preventDefault();
-
-            const nome = document.getElementById('nome').value;
-            const telefone = document.getElementById('telefone').value;
-            const data = document.getElementById('data').value;
-            const horario = document.getElementById('horario').value;
-            const servicos = Array.from(document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]:checked'))
-                .map(cb => cb.value);
-
-            if (servicos.length === 0) {
-                alert('Selecione pelo menos um serviço!');
-                return;
-            }
-
-            const { error } = await supabase
-                .from('agendamentos')
-                .insert([{ nome, telefone, data, horario, servicos }]);
-
-            if (error) {
-                console.error('Erro ao agendar:', error.message);
-                alert('Erro ao agendar.');
-            } else {
-                alert('Agendamento realizado com sucesso!');
-                window.location.href = 'index.html';
-            }
-        }
-
-        // Função para adicionar novo serviço
-        async function adicionarServico(event) {
-            event.preventDefault();
-
-            const novoServico = document.getElementById('novo-servico').value.trim();
-
-            if (!novoServico) {
-                alert('Digite o nome do serviço!');
-                return;
-            }
-
-            const { error } = await supabase
-                .from('servicos')
-                .insert([{ nome: novoServico }]);
-
-            if (error) {
-                console.error('Erro ao adicionar serviço:', error.message);
-                alert('Erro ao adicionar serviço.');
-            } else {
-                alert('Serviço adicionado com sucesso!');
-                document.getElementById('novo-servico').value = ''; // Limpa o campo
-                fecharModal();
-                carregarServicos(); // Recarrega a lista de serviços
-            }
-        }
-
-        // Modal
-        const modal = document.getElementById('modal-servico');
-        const btnAdicionarServico = document.getElementById('btn-adicionar-servico');
-        const spanFechar = document.getElementsByClassName('close')[0];
-
-        // Abre o modal
-        btnAdicionarServico.onclick = function() {
-            modal.style.display = 'block';
-        };
-
-        // Fecha o modal ao clicar no "X"
-        spanFechar.onclick = function() {
-            fecharModal();
-        };
-
-        // Fecha o modal ao clicar fora dele
-        window.onclick = function(event) {
-            if (event.target === modal) {
-                fecharModal();
-            }
-        };
-
-        // Função para fechar o modal
-        function fecharModal() {
-            modal.style.display = 'none';
-        }
-
-        // Configura os eventos ao carregar a página
-        window.onload = function() {
-            carregarServicos();
-            document.getElementById('form-agendamento').addEventListener('submit', salvarAgendamento);
-            document.getElementById('form-novo-servico').addEventListener('submit', adicionarServico);
-        };
-
-        // Aplica a máscara ao campo de telefone
-        $(document).ready(function() {
-            $('#telefone').mask('(00) 0 0000-0000');
-        });
-    </script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

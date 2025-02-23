@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Salão de Beleza</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
     <div class="dashboard">
@@ -29,48 +28,25 @@
             <header>
                 <h2>Dashboard</h2>
                 <div class="user-info">
-                    <span>👤 Gabriel</span>
+                    <span id="user-name">👤 Gabriel</span>
                 </div>
             </header>
 
-            <!-- Cards -->
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="card-icon">📅</div>
-                    <h3>Agendamentos Hoje</h3>
-                    <p id="agendamentos-hoje">0</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📅</div>
-                    <h3>Agendamentos Amanhã</h3>
-                    <p id="agendamentos-amanha">0</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📅</div>
-                    <h3>Agendamentos Semana</h3>
-                    <p id="agendamentos-semana">0</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📅</div>
-                    <h3>Agendamentos Mês</h3>
-                    <p id="agendamentos-mes">0</p>
-                </div>
+            <!-- Total de Agendamentos -->
+            <div class="total-agendamentos">
+                <h3>Total de Agendamentos</h3>
+                <p id="total-agendamentos">0</p>
             </div>
 
-            <!-- Gráficos -->
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <h3>Agendamentos por Dia</h3>
-                    <canvas id="agendamentosChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Serviços Mais Populares</h3>
-                    <canvas id="servicosChart"></canvas>
-                </div>
+            <!-- Lista de Todos os Agendamentos -->
+            <div class="todos-agendamentos">
+                <h3>Todos os Agendamentos</h3>
+                <ul id="todos-agendamentos-lista"></ul>
             </div>
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
