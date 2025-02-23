@@ -3,14 +3,6 @@ const SUPABASE_URL = 'https://zxxgjzqohbdtuofyenmt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGdqenFvaGJkdHVvZnllbm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTEyOTIsImV4cCI6MjA1NTgyNzI5Mn0.bnOyPVj0xTVI1YgZDNGm54-Pl72MoOjcqBLVg1K3kl0';
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Elementos do DOM
-const cards = {
-    hoje: document.querySelector('.card:nth-child(1) p'),
-    amanha: document.querySelector('.card:nth-child(2) p'),
-    semana: document.querySelector('.card:nth-child(3) p'),
-    mes: document.querySelector('.card:nth-child(4) p'),
-};
-
 // Função para carregar dados do dashboard
 async function carregarDashboard() {
     try {
@@ -43,10 +35,10 @@ async function carregarDashboard() {
         });
 
         // Atualiza os cards
-        cards.hoje.textContent = agendamentosHoje.length;
-        cards.amanha.textContent = agendamentosAmanha.length;
-        cards.semana.textContent = agendamentosSemana.length;
-        cards.mes.textContent = agendamentosMes.length;
+        document.getElementById('agendamentos-hoje').textContent = agendamentosHoje.length;
+        document.getElementById('agendamentos-amanha').textContent = agendamentosAmanha.length;
+        document.getElementById('agendamentos-semana').textContent = agendamentosSemana.length;
+        document.getElementById('agendamentos-mes').textContent = agendamentosMes.length;
 
         // Atualiza os gráficos
         atualizarGraficos(agendamentos);
@@ -126,8 +118,3 @@ function atualizarGraficos(agendamentos) {
                 }
             }
         }
-    });
-}
-
-// Carrega o dashboard ao carregar a página
-window.onload = carregarDashboard;

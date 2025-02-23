@@ -3,53 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salão de Beleza - Agendar</title>
+    <title>Agendar - Salão de Beleza</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Biblioteca inputmask -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Salão de Beleza</h1>
-        <nav>
-            <a href="index.html" class="btn">Voltar à Home</a>
-        </nav>
-    </header>
-    <div class="container">
-        <section id="cadastro">
-            <h2 id="form-title">Novo Agendamento</h2>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Salão<span>Beleza</span></h1>
+            </div>
+            <nav>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="agendar.html" class="active">📅 Agendar</a>
+                <a href="detalhes.html">📊 Detalhes</a>
+                <a href="login.html">🚪 Sair</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h2>Agendar</h2>
+                <div class="user-info">
+                    <span>👤 Gabriel</span>
+                </div>
+            </header>
+
+            <!-- Formulário de Agendamento -->
             <form id="form-agendamento">
-                <input type="hidden" id="edit-index">
-                <label for="nome">Nome da Cliente:</label>
+                <label for="nome">Nome:</label>
                 <input type="text" id="nome" placeholder="Digite o nome" required>
+
                 <label for="telefone">Telefone:</label>
-                <input type="text" id="telefone" placeholder="(11) 99999-9999" required>
+                <input type="text" id="telefone" placeholder="(00) 0 0000-0000" required>
+
                 <label for="data">Data:</label>
-                <input type="text" id="data" placeholder="dd/mm/aaaa" required>
+                <input type="date" id="data" required>
+
                 <label for="horario">Horário:</label>
-                <input type="text" id="horario" placeholder="hh:mm" required>
+                <input type="time" id="horario" required>
+
                 <label>Serviços:</label>
-                <div id="servicos-checkboxes"></div>
-                <label for="recorrencia">Recorrência (semanas):</label>
-                <input type="number" id="recorrencia" min="0" max="52" value="0" placeholder="0 = sem recorrência">
-                <button type="submit" id="btn-salvar">Cadastrar</button>
+                <div id="servicos-checkboxes">
+                    <!-- Checkboxes serão preenchidos dinamicamente -->
+                </div>
+
+                <!-- Botão para adicionar novo serviço -->
+                <button type="button" id="btn-adicionar-servico">➕ Adicionar Serviço</button>
+
+                <button type="submit">Agendar</button>
             </form>
-        </section>
 
-        <section id="gerenciar-servicos">
-            <h2>Gerenciar Serviços</h2>
-            <input type="text" id="novo-servico" placeholder="Digite um novo serviço">
-            <button id="btn-adicionar-servico">Adicionar Serviço</button>
-            <ul id="lista-servicos"></ul>
-        </section>
-
-        <section id="lista-agendamentos">
-            <h2>Agendamentos Cadastrados</h2>
-            <input type="text" id="busca" placeholder="Buscar por nome, telefone ou serviço">
-            <ul id="agendamentos"></ul>
-        </section>
+            <!-- Modal para adicionar novo serviço -->
+            <div id="modal-servico" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>Adicionar Novo Serviço</h3>
+                    <form id="form-novo-servico">
+                        <label for="novo-servico">Nome do Serviço:</label>
+                        <input type="text" id="novo-servico" placeholder="Digite o nome do serviço" required>
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- Script para carregar serviços e salvar agendamentos -->
+    <script type="module">
+        // Importa o Supabase
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+        // Configurações do Supabase
+        const SUPABASE_URL = 'https://zxxgjzqohbdtuofyenmt.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGdqenFvaGJkdHVvZnllbm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTEyOTIsImV4cCI6MjA1NTgyNzI5Mn0.bnOyPVj0xTVI1YgZDNGm54-Pl72MoOjcqBLVg1K3kl0';
+
+        // Inicializa o cliente Supabase
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Função para carregar serviços
+        async function carregarServicos() {
+            const { data: servicos, error } = await supabase
+                .from('servicos')
+                .select('*');
+
+            if (error) {
+                console.error('Erro ao carregar serviços:', error.message);
+                return;
+            }
+
+            const container = document.getElementById('servicos-checkboxes');
+            container.innerHTML = ''; // Limpa o container antes de adicionar os checkboxes
+
+            servicos.forEach(servico => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = servico.nome;
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(servico.nome));
+                container.appendChild(label);
+            });
+        }
+
+        // Função para salvar agendamento
+        async function salvarAgendamento(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const telefone = document.getElementById('telefone').value;
+            const data = document.getElementById('data').value;
+            const horario = document.getElementById('horario').value;
+            const servicos = Array.from(document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            if (servicos.length === 0) {
+                alert('Selecione pelo menos um serviço!');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('agendamentos')
+                .insert([{ nome, telefone, data, horario, servicos }]);
+
+            if (error) {
+                console.error('Erro ao agendar:', error.message);
+                alert('Erro ao agendar.');
+            } else {
+                alert('Agendamento realizado com sucesso!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Função para adicionar novo serviço
+        async function adicionarServico(event) {
+            event.preventDefault();
+
+            const novoServico = document.getElementById('novo-servico').value.trim();
+
+            if (!novoServico) {
+                alert('Digite o nome do serviço!');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('servicos')
+                .insert([{ nome: novoServico }]);
+
+            if (error) {
+                console.error('Erro ao adicionar serviço:', error.message);
+                alert('Erro ao adicionar serviço.');
+            } else {
+                alert('Serviço adicionado com sucesso!');
+                document.getElementById('novo-servico').value = ''; // Limpa o campo
+                fecharModal();
+                carregarServicos(); // Recarrega a lista de serviços
+            }
+        }
+
+        // Modal
+        const modal = document.getElementById('modal-servico');
+        const btnAdicionarServico = document.getElementById('btn-adicionar-servico');
+        const spanFechar = document.getElementsByClassName('close')[0];
+
+        // Abre o modal
+        btnAdicionarServico.onclick = function() {
+            modal.style.display = 'block';
+        };
+
+        // Fecha o modal ao clicar no "X"
+        spanFechar.onclick = function() {
+            fecharModal();
+        };
+
+        // Fecha o modal ao clicar fora dele
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                fecharModal();
+            }
+        };
+
+        // Função para fechar o modal
+        function fecharModal() {
+            modal.style.display = 'none';
+        }
+
+        // Configura os eventos ao carregar a página
+        window.onload = function() {
+            carregarServicos();
+            document.getElementById('form-agendamento').addEventListener('submit', salvarAgendamento);
+            document.getElementById('form-novo-servico').addEventListener('submit', adicionarServico);
+        };
+
+        // Aplica a máscara ao campo de telefone
+        $(document).ready(function() {
+            $('#telefone').mask('(00) 0 0000-0000');
+        });
+    </script>
 </body>
 </html>
