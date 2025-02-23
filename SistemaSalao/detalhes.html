@@ -8,18 +8,45 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Salão de Beleza</h1>
-        <nav>
-            <a href="index.html" class="btn">Voltar à Home</a>
-            <a href="agendar.html" class="btn">Agendar</a>
-        </nav>
-    </header>
-    <div class="container">
-        <section id="detalhes">
-            <h2 id="titulo-detalhes">Detalhes</h2>
-            <ul id="lista-detalhes"></ul>
-        </section>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Salão<span>Beleza</span></h1>
+            </div>
+            <nav>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="agendar.html">📅 Agendar</a>
+                <a href="detalhes.html" class="active">📊 Detalhes</a>
+                <a href="login.html">🚪 Sair</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <h2 id="titulo-detalhes">Detalhes</h2>
+                <div class="user-info">
+                    <span id="user-name">👤 Gabriel</span>
+                </div>
+            </header>
+
+            <!-- Filtros e Lista de Detalhes -->
+            <section id="detalhes">
+                <div class="table-controls">
+                    <select id="filtro-periodo" onchange="mostrarDetalhes()">
+                        <option value="todos">Todos</option>
+                        <option value="hoje">Hoje</option>
+                        <option value="amanha">Amanhã</option>
+                        <option value="semana">Semana</option>
+                        <option value="mes">Mês</option>
+                    </select>
+                    <input type="text" id="busca-detalhes" placeholder="Pesquisar por cliente ou serviço" oninput="mostrarDetalhes()">
+                </div>
+                <ul id="lista-detalhes"></ul>
+            </section>
+        </div>
     </div>
     <script src="config.js"></script>
     <script src="script.js"></script>
