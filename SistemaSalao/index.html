@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
     <div class="dashboard" id="dashboard">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -56,10 +57,6 @@
 
             <!-- Gráficos -->
             <div class="charts-container">
-                <div class="chart-box">
-                    <h3>Agendamentos por Dia</h3>
-                    <canvas id="agendamentosChart"></canvas>
-                </div>
                 <div class="chart-box">
                     <h3>Serviços Populares</h3>
                     <canvas id="servicosChart"></canvas>

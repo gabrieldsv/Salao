@@ -1,6 +1,7 @@
 // Declare o supabaseClient globalmente
 let supabaseClient;
-let todosAgendamentos = []; // Armazena todos os agendamentos para filtros
+let todosAgendamentos = [];
+let todosServicos = [];
 
 window.onload = function() {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -14,8 +15,10 @@ window.onload = function() {
         carregarServicos();
         configurarModal();
         document.getElementById('form-agendamento').addEventListener('submit', salvarAgendamento);
-        document.getElementById('btn-adicionar-servico').addEventListener('click', abrirModal);
+        document.getElementById('btn-adicionar-servico').addEventListener('click', () => abrirModal('add'));
+        document.getElementById('btn-excluir-servico').addEventListener('click', () => abrirModal('delete'));
         document.getElementById('form-novo-servico').addEventListener('submit', adicionarServico);
+        document.getElementById('form-excluir-servico').addEventListener('submit', excluirServico);
     } else if (document.getElementById('detalhes-tbody')) {
         carregarDetalhes();
     } else if (document.getElementById('form-login')) {
@@ -42,9 +45,9 @@ async function carregarDashboard() {
         if (error) throw error;
 
         todosAgendamentos = agendamentos;
-        atualizarCards(agendamentos); // Cards mostram totais gerais
-        atualizarGraficos(agendamentos); // Gráficos mostram todos os dados
-        filtrarTabela(); // Tabela aplica filtros dinâmicos
+        atualizarCards(agendamentos);
+        atualizarGraficos(agendamentos);
+        filtrarTabela();
     } catch (error) {
         console.error('Erro ao carregar dashboard:', error.message);
         alert('Erro ao carregar dashboard.');
@@ -79,32 +82,8 @@ function atualizarCards(agendamentos) {
     document.getElementById('agendamentos-mes').textContent = agendamentosMes.length;
 }
 
-// Função para atualizar os gráficos (sem filtros)
+// Função para atualizar os gráficos (apenas Serviços Populares)
 function atualizarGraficos(agendamentos) {
-    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const agendamentosPorDia = diasSemana.map(dia => {
-        return agendamentos.filter(a => {
-            const data = new Date(a.data.split('/').reverse().join('-'));
-            return diasSemana[data.getDay()] === dia;
-        }).length;
-    });
-
-    const agendamentosCtx = document.getElementById('agendamentosChart').getContext('2d');
-    new Chart(agendamentosCtx, {
-        type: 'line',
-        data: {
-            labels: diasSemana,
-            datasets: [{
-                label: 'Agendamentos',
-                data: agendamentosPorDia,
-                backgroundColor: 'rgba(255, 111, 97, 0.2)',
-                borderColor: 'rgba(255, 111, 97, 1)',
-                borderWidth: 2
-            }]
-        },
-        options: { scales: { y: { beginAtZero: true } } }
-    });
-
     const servicos = {};
     agendamentos.forEach(a => a.servicos.forEach(s => servicos[s] = (servicos[s] || 0) + 1));
     const servicosLabels = Object.keys(servicos);
@@ -118,8 +97,8 @@ function atualizarGraficos(agendamentos) {
             datasets: [{
                 label: 'Serviços',
                 data: servicosData,
-                backgroundColor: 'rgba(255, 111, 97, 0.5)',
-                borderColor: 'rgba(255, 111, 97, 1)',
+                backgroundColor: 'rgba(98, 0, 234, 0.5)',
+                borderColor: '#6200EA',
                 borderWidth: 1
             }]
         },
@@ -198,13 +177,14 @@ function filtrarTabela() {
 
 // Funções para agendamento
 async function carregarServicos() {
-    const container = document.getElementById('servicos-checkboxes');
+    const dropdown = document.getElementById('servicos-dropdown');
     const { data: servicos, error } = await supabaseClient.from('servicos').select('*');
     if (error) {
         console.error('Erro ao carregar serviços:', error.message);
         return;
     }
-    container.innerHTML = '';
+    todosServicos = servicos;
+    dropdown.innerHTML = '';
     servicos.forEach(servico => {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
@@ -212,7 +192,17 @@ async function carregarServicos() {
         checkbox.value = servico.nome;
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(servico.nome));
-        container.appendChild(label);
+        dropdown.appendChild(label);
+    });
+
+    // Preencher select de exclusão no modal
+    const selectExcluir = document.getElementById('servico-excluir');
+    selectExcluir.innerHTML = '<option value="">Selecione um serviço</option>';
+    servicos.forEach(servico => {
+        const option = document.createElement('option');
+        option.value = servico.id;
+        option.textContent = servico.nome;
+        selectExcluir.appendChild(option);
     });
 }
 
@@ -229,7 +219,7 @@ async function salvarAgendamento(event) {
     const dataInput = document.getElementById('data').value;
     const data = formatarDataParaSupabase(dataInput);
     const horario = document.getElementById('horario').value;
-    const servicos = Array.from(document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]:checked')).map(cb => cb.value);
+    const servicos = Array.from(document.querySelectorAll('#servicos-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
 
     if (servicos.length === 0) {
         alert('Selecione pelo menos um serviço!');
@@ -279,19 +269,66 @@ async function adicionarServico(event) {
     }
 }
 
-function abrirModal() { document.getElementById('modal-servico').style.display = 'block'; }
-function fecharModal() { document.getElementById('modal-servico').style.display = 'none'; }
+async function excluirServico(event) {
+    event.preventDefault();
+    const servicoId = document.getElementById('servico-excluir').value;
+    if (!servicoId) {
+        alert('Selecione um serviço para excluir!');
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient.from('servicos').delete().eq('id', servicoId);
+        if (error) throw error;
+        alert('Serviço excluído com sucesso!');
+        fecharModal();
+        carregarServicos();
+    } catch (error) {
+        console.error('Erro ao excluir serviço:', error.message);
+        alert('Erro ao excluir serviço.');
+    }
+}
+
+function toggleDropdown() {
+    const dropdown = document.getElementById('servicos-dropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+function abrirModal(mode) {
+    const modal = document.getElementById('modal-servico');
+    const title = document.getElementById('modal-title');
+    const formAdd = document.getElementById('form-novo-servico');
+    const formDelete = document.getElementById('form-excluir-servico');
+    
+    if (mode === 'add') {
+        title.textContent = 'Adicionar Novo Serviço';
+        formAdd.style.display = 'block';
+        formDelete.style.display = 'none';
+    } else {
+        title.textContent = 'Excluir Serviço';
+        formAdd.style.display = 'none';
+        formDelete.style.display = 'block';
+    }
+    modal.style.display = 'block';
+}
+
+function fecharModal() {
+    document.getElementById('modal-servico').style.display = 'none';
+}
+
 function configurarModal() {
     const modal = document.getElementById('modal-servico');
-    const spanFechar = document.getElementsByClassName('close')[0];
-    spanFechar.onclick = fecharModal;
-    window.onclick = function(event) { if (event.target === modal) fecharModal(); };
+    window.onclick = function(event) {
+        if (event.target === modal) fecharModal();
+    };
 }
+
 function limparFormulario() {
     document.getElementById('form-agendamento').reset();
     document.getElementById('edit-index').value = '';
     document.getElementById('form-title').textContent = 'Novo Agendamento';
     document.getElementById('btn-salvar').textContent = 'Salvar';
+    document.querySelectorAll('#servicos-dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
 }
 
 async function editarAgendamento(id) {
@@ -306,7 +343,7 @@ async function editarAgendamento(id) {
         document.getElementById('data').value = dataFormatted;
         document.getElementById('horario').value = agendamento.horario;
 
-        const checkboxes = document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]');
+        const checkboxes = document.querySelectorAll('#servicos-dropdown input[type="checkbox"]');
         checkboxes.forEach(cb => cb.checked = agendamento.servicos.includes(cb.value));
 
         document.getElementById('form-title').textContent = 'Editar Agendamento';
@@ -340,6 +377,11 @@ async function carregarDetalhes() {
         if (error) throw error;
 
         todosAgendamentos = agendamentos;
+        const urlParams = new URLSearchParams(window.location.search);
+        const filtro = urlParams.get('filtro');
+        if (filtro) {
+            document.getElementById('filtro-periodo').value = filtro;
+        }
         filtrarDetalhes();
     } catch (error) {
         console.error('Erro ao carregar detalhes:', error.message);
@@ -441,4 +483,10 @@ async function registrar(event) {
         console.error('Erro ao registrar:', error.message);
         alert('Erro ao registrar.');
     }
+}
+
+// Função para toggle da sidebar
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
 }

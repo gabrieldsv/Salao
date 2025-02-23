@@ -29,6 +29,7 @@ body {
     height: 100%;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease;
+    z-index: 1000;
 }
 
 .sidebar .logo h1 {
@@ -67,12 +68,28 @@ body {
     color: #212121;
 }
 
+/* Botão de toggle para sidebar */
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    background-color: #6200EA;
+    color: #FFFFFF;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 1100;
+}
+
 /* Main Content */
 .main-content {
     flex: 1;
     padding: 24px;
     margin-left: 280px;
     background-color: #FAFAFA;
+    transition: margin-left 0.3s ease;
 }
 
 /* Header */
@@ -100,9 +117,10 @@ header h2 {
 /* Cards de Resumo */
 .cards-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
     margin-bottom: 24px;
+    padding: 0 8px;
 }
 
 .card {
@@ -113,6 +131,8 @@ header h2 {
     text-align: center;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .card:hover {
@@ -135,9 +155,8 @@ header h2 {
 
 /* Gráficos */
 .charts-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    display: flex;
+    justify-content: center;
     margin-bottom: 24px;
 }
 
@@ -146,6 +165,8 @@ header h2 {
     padding: 24px;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
     height: 320px;
 }
 
@@ -187,6 +208,8 @@ header h2 {
     background-color: #FFFFFF;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: border-color 0.3s;
+    width: 100%;
+    max-width: 200px;
 }
 
 .table-controls select:focus,
@@ -275,17 +298,58 @@ td .delete-btn:hover {
     outline: none;
 }
 
-#form-agendamento #servicos-checkboxes {
+/* Dropdown de serviços */
+.dropdown-container {
+    position: relative;
     margin-bottom: 16px;
 }
 
-#form-agendamento #servicos-checkboxes label {
+.dropdown-button {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-button:focus {
+    border-color: #6200EA;
+    outline: none;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dropdown-content label {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
+    padding: 8px;
+    font-size: 14px;
 }
 
+.dropdown-content label:hover {
+    background-color: #F5F5F5;
+}
+
+/* Botões do formulário */
 #form-agendamento button {
     padding: 12px 24px;
     font-size: 14px;
@@ -303,6 +367,17 @@ td .delete-btn:hover {
 
 #btn-adicionar-servico:hover {
     background-color: #00BFA5;
+    transform: translateY(-2px);
+}
+
+#btn-excluir-servico {
+    background-color: #D81B60;
+    color: #FFFFFF;
+    margin-right: 8px;
+}
+
+#btn-excluir-servico:hover {
+    background-color: #B0003A;
     transform: translateY(-2px);
 }
 
@@ -327,6 +402,7 @@ td .delete-btn:hover {
     background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
+    z-index: 2000; /* Aumentado para garantir que fique acima de outros elementos */
 }
 
 .modal-content {
@@ -336,6 +412,16 @@ td .delete-btn:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 400px;
+    margin: auto; /* Centraliza horizontalmente */
+    position: relative; /* Permite posicionamento absoluto para o close */
+}
+
+/* Centralização vertical e horizontal ajustada */
+.modal-content {
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
 }
 
 .close {
@@ -351,32 +437,110 @@ td .delete-btn:hover {
     margin-bottom: 16px;
 }
 
+/* Login e Registro */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #FAFAFA;
+}
+
+.auth-form {
+    background-color: #FFFFFF;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-form h3 {
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.auth-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #212121;
+    margin-bottom: 8px;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form input:focus {
+    border-color: #6200EA;
+    outline: none;
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    background-color: #6200EA;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.auth-form button:hover {
+    background-color: #4500A0;
+    transform: translateY(-2px);
+}
+
+.auth-form p {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.auth-form a {
+    color: #6200EA;
+    text-decoration: none;
+}
+
 /* Responsividade */
 @media (max-width: 960px) {
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: fixed;
-        top: 0;
-        transform: translateY(-100%);
-        z-index: 1000;
+        width: 280px;
+        transform: translateX(-100%);
     }
 
     .sidebar.active {
-        transform: translateY(0);
+        transform: translateX(0);
     }
 
     .main-content {
         margin-left: 0;
-        padding-top: 64px;
+    }
+
+    .sidebar-toggle {
+        display: block;
     }
 
     .charts-container {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: center;
     }
 
     .cards-container {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+        padding: 0 4px;
     }
 }
 
@@ -384,6 +548,11 @@ td .delete-btn:hover {
     .table-controls {
         flex-direction: column;
         gap: 8px;
+    }
+
+    .table-controls select,
+    .table-controls input {
+        max-width: 100%;
     }
 
     th, td {
@@ -394,5 +563,29 @@ td .delete-btn:hover {
     td button {
         padding: 6px 12px;
         font-size: 12px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .card p {
+        font-size: 24px;
+    }
+
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 0;
+    }
+
+    .chart-box {
+        padding: 16px;
+        height: 280px;
+    }
+
+    .modal-content {
+        width: 80%;
+        max-width: 300px; /* Reduzido para telas pequenas */
     }
 }

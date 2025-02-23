@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 </head>
 <body>
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
     <div class="dashboard">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -46,21 +47,30 @@
                 <label for="horario">Horário:</label>
                 <input type="time" id="horario" required>
                 <label>Serviços:</label>
-                <div id="servicos-checkboxes"></div>
+                <div class="dropdown-container">
+                    <button type="button" class="dropdown-button" onclick="toggleDropdown()">Selecionar Serviços</button>
+                    <div id="servicos-dropdown" class="dropdown-content"></div>
+                </div>
                 <input type="hidden" id="edit-index">
                 <button type="button" id="btn-adicionar-servico">➕ Adicionar Serviço</button>
+                <button type="button" id="btn-excluir-servico">🗑️ Excluir Serviço</button>
                 <button type="submit" id="btn-salvar">Salvar</button>
             </form>
 
-            <!-- Modal para adicionar novo serviço -->
+            <!-- Modal para adicionar/excluir serviço -->
             <div id="modal-servico" class="modal">
                 <div class="modal-content">
-                    <span class="close">×</span>
-                    <h3>Adicionar Novo Serviço</h3>
+                    <span class="close" onclick="fecharModal()">×</span>
+                    <h3 id="modal-title">Adicionar Novo Serviço</h3>
                     <form id="form-novo-servico">
                         <label for="novo-servico">Nome do Serviço:</label>
                         <input type="text" id="novo-servico" placeholder="Digite o nome do serviço" required>
                         <button type="submit">Salvar</button>
+                    </form>
+                    <form id="form-excluir-servico" style="margin-top: 16px;">
+                        <label for="servico-excluir">Serviço a Excluir:</label>
+                        <select id="servico-excluir"></select>
+                        <button type="submit">Excluir</button>
                     </form>
                 </div>
             </div>

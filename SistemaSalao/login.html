@@ -9,9 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-    <div class="main-content" style="margin-left: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-        <div class="agendamentos-table" style="max-width: 400px; width: 100%;">
-            <h3 style="text-align: center;">Login</h3>
+    <div class="auth-container">
+        <div class="auth-form">
+            <h3>Login</h3>
             <form id="form-login">
                 <label for="email">E-mail:</label>
                 <input type="email" id="email" placeholder="Digite seu e-mail" required>
@@ -19,7 +19,7 @@
                 <input type="password" id="senha" placeholder="Digite sua senha" required>
                 <button type="submit" id="btn-login">Entrar</button>
             </form>
-            <p style="text-align: center; margin-top: 16px;">Não tem uma conta? <a href="registro.html" style="color: #6200EA;">Registre-se</a></p>
+            <p>Não tem uma conta? <a href="registro.html">Registre-se</a></p>
         </div>
     </div>
     <script src="config.js"></script>
