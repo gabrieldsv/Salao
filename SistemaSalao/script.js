@@ -16,8 +16,8 @@ window.onload = function() {
         document.getElementById('form-agendamento').addEventListener('submit', salvarAgendamento);
         document.getElementById('btn-adicionar-servico').addEventListener('click', abrirModal);
         document.getElementById('form-novo-servico').addEventListener('submit', adicionarServico);
-    } else if (document.getElementById('detalhes')) {
-        mostrarDetalhes();
+    } else if (document.getElementById('detalhes-tbody')) {
+        carregarDetalhes(); // Carrega os dados iniciais
     } else if (document.getElementById('form-login')) {
         document.getElementById('form-login').addEventListener('submit', login);
     } else if (document.getElementById('form-registro')) {
@@ -132,7 +132,7 @@ function formatarDataParaComparacao(dataStr) {
     return new Date(dataStr.split('/').reverse().join('-'));
 }
 
-// Função para filtrar a tabela
+// Função para filtrar a tabela no dashboard
 function filtrarTabela(periodo = document.getElementById('filtro-periodo').value) {
     const busca = document.getElementById('busca-agendamento').value.toLowerCase();
     const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -230,6 +230,7 @@ async function salvarAgendamento(event) {
         }
         limparFormulario();
         if (window.location.pathname.includes('index.html')) atualizarDashboard();
+        else if (window.location.pathname.includes('detalhes.html')) carregarDetalhes();
         else window.location.href = 'index.html';
     } catch (error) {
         console.error('Erro ao salvar agendamento:', error.message);
@@ -303,7 +304,8 @@ async function excluirAgendamento(id) {
             const { error } = await supabaseClient.from('agendamentos').delete().eq('id', id);
             if (error) throw error;
             alert('Agendamento excluído com sucesso!');
-            atualizarDashboard();
+            if (window.location.pathname.includes('index.html')) atualizarDashboard();
+            else if (window.location.pathname.includes('detalhes.html')) carregarDetalhes();
         } catch (error) {
             console.error('Erro ao excluir agendamento:', error.message);
             alert('Erro ao excluir agendamento.');
@@ -311,12 +313,26 @@ async function excluirAgendamento(id) {
     }
 }
 
-async function mostrarDetalhes() {
+// Função para carregar os dados iniciais da página detalhes
+async function carregarDetalhes() {
+    try {
+        const { data: agendamentos, error } = await supabaseClient.from('agendamentos').select('*');
+        if (error) throw error;
+
+        todosAgendamentos = agendamentos; // Armazena os dados globalmente
+        filtrarDetalhes(); // Aplica os filtros iniciais
+    } catch (error) {
+        console.error('Erro ao carregar detalhes:', error.message);
+        alert('Erro ao carregar detalhes.');
+    }
+}
+
+// Função para filtrar os detalhes na tabela
+function filtrarDetalhes() {
     const periodo = document.getElementById('filtro-periodo').value;
     const busca = document.getElementById('busca-detalhes').value.toLowerCase();
-    const lista = document.getElementById('lista-detalhes');
-    const titulo = document.getElementById('titulo-detalhes');
-    lista.innerHTML = '';
+    const tbody = document.getElementById('detalhes-tbody');
+    tbody.innerHTML = '';
 
     const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const amanha = new Date();
@@ -328,55 +344,51 @@ async function mostrarDetalhes() {
     const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
 
-    try {
-        const { data: agendamentos, error } = await supabaseClient.from('agendamentos').select('*');
-        if (error) throw error;
-
-        let filteredAgendamentos = agendamentos;
-        switch (periodo) {
-            case 'hoje':
-                filteredAgendamentos = agendamentos.filter(a => a.data === hoje);
-                titulo.textContent = 'Agendamentos de Hoje';
-                break;
-            case 'amanha':
-                filteredAgendamentos = agendamentos.filter(a => a.data === amanhaStr);
-                titulo.textContent = 'Agendamentos de Amanhã';
-                break;
-            case 'semana':
-                filteredAgendamentos = agendamentos.filter(a => {
-                    const dataAgendamento = formatarDataParaComparacao(a.data);
-                    return dataAgendamento >= inicioSemana && dataAgendamento <= fimSemana;
-                });
-                titulo.textContent = 'Agendamentos da Semana';
-                break;
-            case 'mes':
-                filteredAgendamentos = agendamentos.filter(a => {
-                    const dataAgendamento = formatarDataParaComparacao(a.data);
-                    return dataAgendamento >= inicioMes && dataAgendamento <= fimMes;
-                });
-                titulo.textContent = 'Agendamentos do Mês';
-                break;
-            default:
-                filteredAgendamentos = agendamentos;
-                titulo.textContent = 'Todos os Agendamentos';
-        }
-
-        if (busca) {
-            filteredAgendamentos = filteredAgendamentos.filter(a => 
-                a.nome.toLowerCase().includes(busca) || 
-                a.servicos.some(s => s.toLowerCase().includes(busca))
-            );
-        }
-
-        filteredAgendamentos.forEach(agendamento => {
-            const item = document.createElement('li');
-            item.textContent = `${agendamento.nome} - ${agendamento.telefone} - ${agendamento.servicos.join(', ')} - ${agendamento.data} às ${agendamento.horario}`;
-            lista.appendChild(item);
-        });
-    } catch (error) {
-        console.error('Erro ao carregar detalhes:', error.message);
-        alert('Erro ao carregar detalhes.');
+    let filteredAgendamentos = todosAgendamentos;
+    switch (periodo) {
+        case 'hoje':
+            filteredAgendamentos = todosAgendamentos.filter(a => a.data === hoje);
+            break;
+        case 'amanha':
+            filteredAgendamentos = todosAgendamentos.filter(a => a.data === amanhaStr);
+            break;
+        case 'semana':
+            filteredAgendamentos = todosAgendamentos.filter(a => {
+                const dataAgendamento = formatarDataParaComparacao(a.data);
+                return dataAgendamento >= inicioSemana && dataAgendamento <= fimSemana;
+            });
+            break;
+        case 'mes':
+            filteredAgendamentos = todosAgendamentos.filter(a => {
+                const dataAgendamento = formatarDataParaComparacao(a.data);
+                return dataAgendamento >= inicioMes && dataAgendamento <= fimMes;
+            });
+            break;
+        default:
+            filteredAgendamentos = todosAgendamentos;
     }
+
+    if (busca) {
+        filteredAgendamentos = filteredAgendamentos.filter(a => 
+            a.nome.toLowerCase().includes(busca) || 
+            a.servicos.some(s => s.toLowerCase().includes(busca))
+        );
+    }
+
+    filteredAgendamentos.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${a.data}</td>
+            <td>${a.horario}</td>
+            <td>${a.nome}</td>
+            <td>${a.servicos.join(', ')}</td>
+            <td>
+                <button class="edit-btn" onclick="editarAgendamento(${a.id})">Editar</button>
+                <button class="delete-btn" onclick="excluirAgendamento(${a.id})">Excluir</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 async function login(event) {

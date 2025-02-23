@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salão de Beleza - Detalhes</title>
+    <title>Detalhes - Salão de Beleza</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -26,28 +27,41 @@
         <div class="main-content">
             <!-- Header -->
             <header>
-                <h2 id="titulo-detalhes">Detalhes</h2>
+                <h2>Detalhes</h2>
                 <div class="user-info">
                     <span id="user-name">👤 Gabriel</span>
                 </div>
             </header>
 
-            <!-- Filtros e Lista de Detalhes -->
-            <section id="detalhes">
+            <!-- Seção de Detalhes -->
+            <div class="agendamentos-table">
+                <h3>Lista de Agendamentos</h3>
                 <div class="table-controls">
-                    <select id="filtro-periodo" onchange="mostrarDetalhes()">
+                    <select id="filtro-periodo" onchange="filtrarDetalhes()">
                         <option value="todos">Todos</option>
                         <option value="hoje">Hoje</option>
                         <option value="amanha">Amanhã</option>
                         <option value="semana">Semana</option>
                         <option value="mes">Mês</option>
                     </select>
-                    <input type="text" id="busca-detalhes" placeholder="Pesquisar por cliente ou serviço" oninput="mostrarDetalhes()">
+                    <input type="text" id="busca-detalhes" placeholder="Pesquisar por cliente ou serviço" oninput="filtrarDetalhes()">
                 </div>
-                <ul id="lista-detalhes"></ul>
-            </section>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Serviços</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalhes-tbody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
+
     <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
