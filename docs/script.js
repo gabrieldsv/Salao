@@ -5,7 +5,8 @@ let todosServicos = [];
 let todosClientes = [];
 let servicosChartInstance = null; // Armazena a instância do gráfico
 
-window.onload = function() {
+// Espera o DOM estar completamente carregado antes de executar o código
+document.addEventListener('DOMContentLoaded', function() {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     checkUserSession();
     if (document.getElementById('dashboard')) {
@@ -25,12 +26,14 @@ window.onload = function() {
         document.getElementById('form-novo-cliente').addEventListener('submit', cadastrarCliente);
     } else if (document.getElementById('detalhes-tbody')) {
         carregarDetalhes();
+    } else if (document.getElementById('clientes-tbody')) {
+        carregarClientesTabela();
     } else if (document.getElementById('form-login')) {
         document.getElementById('form-login').addEventListener('submit', login);
     } else if (document.getElementById('form-registro')) {
         document.getElementById('form-registro').addEventListener('submit', registrar);
     }
-};
+});
 
 // Função para verificar a sessão do usuário
 async function checkUserSession() {
@@ -211,14 +214,61 @@ async function carregarClientes() {
         return;
     }
     todosClientes = clientes;
+    filtrarClientes(); // Chama a função de filtro para preencher inicialmente
+}
+
+function filtrarClientes() {
+    const busca = document.getElementById('busca-clientes') ? document.getElementById('busca-clientes').value.toLowerCase() : '';
     const select = document.getElementById('clientes-lista');
-    select.innerHTML = '<option value="">Selecione um cliente</option>';
-    clientes.forEach(cliente => {
-        const option = document.createElement('option');
-        option.value = cliente.id;
-        option.textContent = `${cliente.nome} - ${cliente.telefone}`;
-        select.appendChild(option);
-    });
+    if (select) {
+        select.innerHTML = '<option value="">Selecione um cliente</option>';
+        const filteredClientes = todosClientes.filter(cliente => 
+            cliente.nome.toLowerCase().includes(busca) || 
+            cliente.telefone.toLowerCase().includes(busca)
+        );
+        filteredClientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = `${cliente.nome} - ${cliente.telefone}`;
+            select.appendChild(option);
+        });
+    }
+}
+
+async function carregarClientesTabela() {
+    const { data: clientes, error } = await supabaseClient.from('cadastros').select('*');
+    if (error) {
+        console.error('Erro ao carregar clientes:', error.message);
+        alert('Erro ao carregar a lista de clientes.');
+        return;
+    }
+    todosClientes = clientes;
+    filtrarClientesTabela();
+}
+
+function filtrarClientesTabela() {
+    const busca = document.getElementById('busca-clientes-tabela') ? document.getElementById('busca-clientes-tabela').value.toLowerCase() : '';
+    const tbody = document.getElementById('clientes-tbody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        const filteredClientes = todosClientes.filter(cliente => 
+            cliente.nome.toLowerCase().includes(busca) || 
+            cliente.telefone.toLowerCase().includes(busca)
+        );
+
+        filteredClientes.forEach(cliente => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${cliente.nome}</td>
+                <td>${cliente.telefone}</td>
+                <td>
+                    <button class="edit-btn" onclick="editarCliente(${cliente.id})">Editar</button>
+                    <button class="delete-btn" onclick="excluirCliente(${cliente.id})">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 }
 
 async function cadastrarCliente(event) {
@@ -238,9 +288,81 @@ async function cadastrarCliente(event) {
         fecharModalClientes();
         await carregarClientes();
         selecionarClienteAutomaticamente(data[0].id);
+        if (document.getElementById('clientes-tbody')) carregarClientesTabela(); // Verifica se o elemento existe
     } catch (error) {
         console.error('Erro ao cadastrar cliente:', error.message);
         alert('Erro ao cadastrar cliente.');
+    }
+}
+
+async function editarCliente(id) {
+    try {
+        const { data: cliente, error } = await supabaseClient.from('cadastros').select('*').eq('id', id).single();
+        if (error) throw error;
+
+        document.getElementById('edit-cliente-nome').value = cliente.nome;
+        document.getElementById('edit-cliente-telefone').value = cliente.telefone;
+
+        const modal = document.getElementById('modal-editar-cliente');
+        modal.classList.add('active');
+
+        document.getElementById('form-editar-cliente').onsubmit = async function(event) {
+            event.preventDefault();
+            const nome = document.getElementById('edit-cliente-nome').value.trim();
+            const telefone = document.getElementById('edit-cliente-telefone').value.trim();
+
+            if (!nome || !telefone) {
+                alert('Preencha todos os campos!');
+                return;
+            }
+
+            // Atualizar o cliente na tabela cadastros
+            const { data: updatedCliente, error: clienteUpdateError } = await supabaseClient
+                .from('cadastros')
+                .update({ nome, telefone })
+                .eq('id', id)
+                .select();
+            if (clienteUpdateError) throw clienteUpdateError;
+
+            // Atualizar todos os agendamentos associados a este cliente
+            const { error: agendamentoUpdateError } = await supabaseClient
+                .from('agendamentos')
+                .update({ nome, telefone })
+                .eq('cliente_id', id);
+            if (agendamentoUpdateError) throw agendamentoUpdateError;
+
+            alert('Cliente e agendamentos atualizados com sucesso!');
+            modal.classList.remove('active');
+            await carregarClientes();
+            if (document.getElementById('clientes-tbody')) carregarClientesTabela(); // Verifica se o elemento existe
+        };
+    } catch (error) {
+        console.error('Erro ao carregar cliente para edição:', error.message);
+        alert('Erro ao carregar dados do cliente.');
+    }
+}
+
+async function excluirCliente(id) {
+    if (confirm('Tem certeza que deseja excluir este cliente?')) {
+        try {
+            // Verificar se o cliente está associado a algum agendamento antes de excluir
+            const { data: agendamentos, error: agendamentoError } = await supabaseClient.from('agendamentos').select('id').eq('cliente_id', id);
+            if (agendamentoError) throw agendamentoError;
+
+            if (agendamentos.length > 0) {
+                alert('Não é possível excluir este cliente, pois ele está associado a agendamentos.');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('cadastros').delete().eq('id', id);
+            if (error) throw error;
+            alert('Cliente excluído com sucesso!');
+            await carregarClientes();
+            if (document.getElementById('clientes-tbody')) carregarClientesTabela(); // Verifica se o elemento existe
+        } catch (error) {
+            console.error('Erro ao excluir cliente:', error.message);
+            alert('Erro ao excluir cliente.');
+        }
     }
 }
 
@@ -280,6 +402,10 @@ function selecionarClienteAutomaticamente(clienteId) {
         document.getElementById('cliente-id').value = cliente.id;
         document.getElementById('cliente-selecionado').textContent = `${cliente.nome} - ${cliente.telefone}`;
     }
+}
+
+function fecharModalCliente() {
+    document.getElementById('modal-editar-cliente').classList.remove('active');
 }
 
 // Funções para agendamento
@@ -350,7 +476,7 @@ async function salvarAgendamento(event) {
         }
         limparFormulario();
         if (window.location.pathname.includes('index.html')) carregarDashboard();
-        else if (window.location.pathname.includes('detalhes.html')) carregarDetalhes();
+        else if (window.location.pathname.includes('agendamentos.html')) carregarDetalhes();
         else window.location.href = 'index.html';
     } catch (error) {
         console.error('Erro ao salvar agendamento:', error.message);
@@ -432,9 +558,11 @@ function fecharModal() {
 function configurarModal() {
     const modalServico = document.getElementById('modal-servico');
     const modalClientes = document.getElementById('modal-clientes');
+    const modalEditarCliente = document.getElementById('modal-editar-cliente');
     window.onclick = function(event) {
         if (event.target === modalServico) fecharModal();
         if (event.target === modalClientes) fecharModalClientes();
+        if (event.target === modalEditarCliente) fecharModalCliente();
     };
 }
 
@@ -453,8 +581,16 @@ async function editarAgendamento(id) {
         const { data: agendamento, error } = await supabaseClient.from('agendamentos').select('*').eq('id', id).single();
         if (error) throw error;
 
-        document.getElementById('edit-nome').value = agendamento.nome;
-        document.getElementById('edit-telefone').value = agendamento.telefone;
+        // Buscar o cliente da tabela cadastros para garantir os dados atualizados
+        const { data: cliente, error: clienteError } = await supabaseClient
+            .from('cadastros')
+            .select('*')
+            .eq('id', agendamento.cliente_id)
+            .single();
+        if (clienteError) throw clienteError;
+
+        document.getElementById('edit-nome').value = cliente.nome;
+        document.getElementById('edit-telefone').value = cliente.telefone;
         const dataFormatted = agendamento.data.split('/').reverse().join('-');
         document.getElementById('edit-data').value = dataFormatted;
         document.getElementById('edit-horario').value = agendamento.horario;
@@ -464,23 +600,45 @@ async function editarAgendamento(id) {
 
         document.getElementById('form-editar-agendamento').onsubmit = async function(event) {
             event.preventDefault();
-            const nome = document.getElementById('edit-nome').value;
-            const telefone = document.getElementById('edit-telefone').value;
+            const nome = document.getElementById('edit-nome').value.trim();
+            const telefone = document.getElementById('edit-telefone').value.trim();
             const dataInput = document.getElementById('edit-data').value;
             const data = formatarDataParaSupabase(dataInput);
             const horario = document.getElementById('edit-horario').value;
 
-            const { error } = await supabaseClient.from('agendamentos').update({ nome, telefone, data, horario }).eq('id', id);
+            if (!nome || !telefone) {
+                alert('Preencha todos os campos!');
+                return;
+            }
+
+            // Atualizar o cliente na tabela cadastros
+            const { data: updatedCliente, error: clienteUpdateError } = await supabaseClient
+                .from('cadastros')
+                .update({ nome, telefone })
+                .eq('id', agendamento.cliente_id)
+                .select();
+            if (clienteUpdateError) throw clienteUpdateError;
+
+            // Atualizar todos os agendamentos associados a este cliente
+            const { error: agendamentoUpdateError } = await supabaseClient
+                .from('agendamentos')
+                .update({ nome, telefone })
+                .eq('cliente_id', agendamento.cliente_id);
+            if (agendamentoUpdateError) throw agendamentoUpdateError;
+
+            // Atualizar o agendamento específico
+            const { error } = await supabaseClient.from('agendamentos').update({ data, horario }).eq('id', id);
             if (error) throw error;
 
-            alert('Agendamento atualizado com sucesso!');
+            alert('Agendamento e cliente atualizados com sucesso!');
             modal.classList.remove('active');
+            await carregarClientes(); // Atualizar a lista de clientes
             if (window.location.pathname.includes('index.html')) carregarDashboard();
-            else if (window.location.pathname.includes('detalhes.html')) carregarDetalhes();
+            else if (window.location.pathname.includes('agendamentos.html')) carregarDetalhes();
         };
     } catch (error) {
         console.error('Erro ao editar agendamento:', error.message);
-        alert('Erro ao editar agendamento.');
+        alert('Erro ao carregar ou atualizar o agendamento.');
     }
 }
 
@@ -491,7 +649,7 @@ async function excluirAgendamento(id) {
             if (error) throw error;
             alert('Agendamento excluído com sucesso!');
             if (window.location.pathname.includes('index.html')) carregarDashboard();
-            else if (window.location.pathname.includes('detalhes.html')) carregarDetalhes();
+            else if (window.location.pathname.includes('agendamentos.html')) carregarDetalhes();
         } catch (error) {
             console.error('Erro ao excluir agendamento:', error.message);
             alert('Erro ao excluir agendamento.');
@@ -499,7 +657,7 @@ async function excluirAgendamento(id) {
     }
 }
 
-// Função para carregar os dados iniciais da página detalhes
+// Função para carregar os dados iniciais da página agendamentos
 async function carregarDetalhes() {
     try {
         const { data: agendamentos, error } = await supabaseClient.from('agendamentos').select('*');
@@ -513,12 +671,12 @@ async function carregarDetalhes() {
         }
         filtrarDetalhes();
     } catch (error) {
-        console.error('Erro ao carregar detalhes:', error.message);
-        alert('Erro ao carregar detalhes.');
+        console.error('Erro ao carregar agendamentos:', error.message);
+        alert('Erro ao carregar agendamentos.');
     }
 }
 
-// Função para filtrar os detalhes na tabela
+// Função para filtrar os agendamentos na tabela
 function filtrarDetalhes() {
     const periodo = document.getElementById('filtro-periodo').value;
     const busca = document.getElementById('busca-detalhes').value.toLowerCase();

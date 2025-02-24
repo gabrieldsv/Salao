@@ -24,7 +24,8 @@
             <nav>
                 <a href="index.html">🏠 Dashboard</a>
                 <a href="agendar.html" class="active">📅 Agendar</a>
-                <a href="detalhes.html">📊 Detalhes</a>
+                <a href="agendamentos.html">📋 Agendamentos</a>
+                <a href="clientes.html">👥 Clientes</a>
                 <a href="login.html">🚪 Sair</a>
             </nav>
         </div>
@@ -71,6 +72,7 @@
                         </div>
                         <!-- Escolher Cliente -->
                         <div id="escolher-cliente" class="cliente-section" style="display: none;">
+                            <input type="text" id="busca-clientes" placeholder="Pesquisar cliente" oninput="filtrarClientes()">
                             <select id="clientes-lista" class="modal-select"></select>
                             <button type="button" class="modal-btn" onclick="selecionarCliente()">Confirmar</button>
                         </div>
