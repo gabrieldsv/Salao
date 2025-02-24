@@ -590,6 +590,25 @@ td .delete-btn:hover {
     text-decoration: none;
 }
 
+/* Estilo para exibição do cliente selecionado */
+.cliente-display {
+    display: block;
+    font-size: 14px;
+    color: #757575;
+    margin-bottom: 16px;
+}
+
+/* Estilo para opções de cliente no modal */
+.cliente-options {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.cliente-section {
+    margin-top: 16px;
+}
+
 /* Responsividade */
 @media (max-width: 960px) {
     .sidebar {

@@ -41,10 +41,10 @@
 
             <!-- Formulário de Agendamento -->
             <form id="form-agendamento">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" placeholder="Digite o nome" required>
-                <label for="telefone">Telefone:</label>
-                <input type="text" id="telefone" placeholder="(00) 0 0000-0000" required>
+                <label>Cliente:</label>
+                <button type="button" class="dropdown-button" onclick="abrirModalClientes()">Escolher ou Cadastrar Cliente</button>
+                <input type="hidden" id="cliente-id" name="cliente-id">
+                <span id="cliente-selecionado" class="cliente-display">Nenhum cliente selecionado</span>
                 <label for="data">Data:</label>
                 <input type="date" id="data" required>
                 <label for="horario">Horário:</label>
@@ -56,6 +56,35 @@
                 <button type="button" id="btn-excluir-servico">🗑️ Excluir Serviço</button>
                 <button type="submit" id="btn-salvar">Salvar</button>
             </form>
+
+            <!-- Modal para escolher ou cadastrar cliente -->
+            <div id="modal-clientes" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Escolher ou Cadastrar Cliente</h3>
+                        <span class="close" onclick="fecharModalClientes()">×</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="cliente-options">
+                            <button type="button" class="modal-btn" onclick="mostrarEscolherCliente()">Escolher Cliente</button>
+                            <button type="button" class="modal-btn" onclick="mostrarCadastrarCliente()">Cadastrar Novo</button>
+                        </div>
+                        <!-- Escolher Cliente -->
+                        <div id="escolher-cliente" class="cliente-section" style="display: none;">
+                            <select id="clientes-lista" class="modal-select"></select>
+                            <button type="button" class="modal-btn" onclick="selecionarCliente()">Confirmar</button>
+                        </div>
+                        <!-- Cadastrar Cliente -->
+                        <form id="form-novo-cliente" class="modal-form" style="display: none;">
+                            <label for="novo-nome">Nome:</label>
+                            <input type="text" id="novo-nome" placeholder="Digite o nome" required>
+                            <label for="novo-telefone">Telefone:</label>
+                            <input type="text" id="novo-telefone" placeholder="(00) 0 0000-0000" required>
+                            <button type="submit" class="modal-btn">Cadastrar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
             <!-- Modal para adicionar/excluir serviço -->
             <div id="modal-servico" class="modal">

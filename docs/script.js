@@ -2,6 +2,7 @@
 let supabaseClient;
 let todosAgendamentos = [];
 let todosServicos = [];
+let todosClientes = [];
 let servicosChartInstance = null; // Armazena a instância do gráfico
 
 window.onload = function() {
@@ -11,15 +12,17 @@ window.onload = function() {
         carregarDashboard();
     } else if (document.getElementById('form-agendamento')) {
         if (typeof $ !== 'undefined') {
-            $('#telefone').mask('(00) 0 0000-0000');
+            $('#novo-telefone').mask('(00) 0 0000-0000');
         }
         carregarServicos();
+        carregarClientes();
         configurarModal();
         document.getElementById('form-agendamento').addEventListener('submit', salvarAgendamento);
         document.getElementById('btn-adicionar-servico').addEventListener('click', () => abrirModal('add'));
         document.getElementById('btn-excluir-servico').addEventListener('click', () => abrirModal('delete'));
         document.getElementById('form-novo-servico').addEventListener('submit', adicionarServico);
         document.getElementById('form-excluir-servico').addEventListener('submit', excluirServico);
+        document.getElementById('form-novo-cliente').addEventListener('submit', cadastrarCliente);
     } else if (document.getElementById('detalhes-tbody')) {
         carregarDetalhes();
     } else if (document.getElementById('form-login')) {
@@ -45,38 +48,33 @@ async function carregarDashboard() {
     const maxTentativas = 3;
     let agendamentos;
 
-    // Tenta carregar os dados do Supabase
     while (tentativas < maxTentativas) {
         try {
             console.log(`Tentativa ${tentativas + 1} de carregar os agendamentos...`);
             const { data, error } = await supabaseClient.from('agendamentos').select('*');
-            if (error) {
-                console.error('Erro retornado pelo Supabase:', error);
-                throw error;
-            }
+            if (error) throw error;
             console.log('Agendamentos carregados com sucesso:', data);
-            agendamentos = data || []; // Garante que não seja null
-            break; // Sai do loop se sucesso
+            agendamentos = data || [];
+            break;
         } catch (error) {
             tentativas++;
             console.error(`Tentativa ${tentativas} falhou:`, error.message);
             if (tentativas === maxTentativas) {
                 console.error('Todas as tentativas falharam. Detalhes do erro:', error);
-                alert('Erro persistente ao carregar os agendamentos do Supabase. Verifique o console e tente novamente mais tarde.');
-                agendamentos = []; // Usa array vazio como fallback
+                alert('Erro persistente ao carregar os agendamentos do Supabase.');
+                agendamentos = [];
             }
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1s
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
-    // Atualiza os dados mesmo que o gráfico falhe
     todosAgendamentos = agendamentos;
     atualizarCards(todosAgendamentos);
     try {
         atualizarGraficos(todosAgendamentos);
     } catch (error) {
         console.error('Erro ao atualizar o gráfico:', error.message);
-        alert('Erro ao renderizar o gráfico. Os dados foram carregados, mas o gráfico não pôde ser exibido.');
+        alert('Erro ao renderizar o gráfico.');
     }
     filtrarTabela();
 }
@@ -109,7 +107,7 @@ function atualizarCards(agendamentos) {
     document.getElementById('agendamentos-mes').textContent = agendamentosMes.length;
 }
 
-// Função para atualizar os gráficos, destruindo o anterior se existir
+// Função para atualizar os gráficos
 function atualizarGraficos(agendamentos) {
     const servicos = {};
     agendamentos.forEach(a => a.servicos.forEach(s => servicos[s] = (servicos[s] || 0) + 1));
@@ -117,14 +115,9 @@ function atualizarGraficos(agendamentos) {
     const servicosData = Object.values(servicos);
 
     const servicosCtx = document.getElementById('servicosChart').getContext('2d');
-
-    // Destroi o gráfico anterior, se existir
     if (servicosChartInstance) {
         servicosChartInstance.destroy();
-        console.log('Gráfico anterior destruído.');
     }
-
-    // Cria um novo gráfico
     servicosChartInstance = new Chart(servicosCtx, {
         type: 'bar',
         data: {
@@ -139,7 +132,6 @@ function atualizarGraficos(agendamentos) {
         },
         options: { scales: { y: { beginAtZero: true } } }
     });
-    console.log('Novo gráfico criado com sucesso.');
 }
 
 // Função para formatar data para comparação
@@ -211,6 +203,85 @@ function filtrarTabela() {
     });
 }
 
+// Funções para clientes
+async function carregarClientes() {
+    const { data: clientes, error } = await supabaseClient.from('cadastros').select('*');
+    if (error) {
+        console.error('Erro ao carregar clientes:', error.message);
+        return;
+    }
+    todosClientes = clientes;
+    const select = document.getElementById('clientes-lista');
+    select.innerHTML = '<option value="">Selecione um cliente</option>';
+    clientes.forEach(cliente => {
+        const option = document.createElement('option');
+        option.value = cliente.id;
+        option.textContent = `${cliente.nome} - ${cliente.telefone}`;
+        select.appendChild(option);
+    });
+}
+
+async function cadastrarCliente(event) {
+    event.preventDefault();
+    const nome = document.getElementById('novo-nome').value.trim();
+    const telefone = document.getElementById('novo-telefone').value.trim();
+    if (!nome || !telefone) {
+        alert('Preencha todos os campos!');
+        return;
+    }
+
+    try {
+        const { data, error } = await supabaseClient.from('cadastros').insert([{ nome, telefone }]).select();
+        if (error) throw error;
+        alert('Cliente cadastrado com sucesso!');
+        document.getElementById('form-novo-cliente').reset();
+        fecharModalClientes();
+        await carregarClientes();
+        selecionarClienteAutomaticamente(data[0].id);
+    } catch (error) {
+        console.error('Erro ao cadastrar cliente:', error.message);
+        alert('Erro ao cadastrar cliente.');
+    }
+}
+
+function abrirModalClientes() {
+    document.getElementById('modal-clientes').classList.add('active');
+    document.getElementById('escolher-cliente').style.display = 'none';
+    document.getElementById('form-novo-cliente').style.display = 'none';
+}
+
+function fecharModalClientes() {
+    document.getElementById('modal-clientes').classList.remove('active');
+}
+
+function mostrarEscolherCliente() {
+    document.getElementById('escolher-cliente').style.display = 'block';
+    document.getElementById('form-novo-cliente').style.display = 'none';
+}
+
+function mostrarCadastrarCliente() {
+    document.getElementById('escolher-cliente').style.display = 'none';
+    document.getElementById('form-novo-cliente').style.display = 'block';
+}
+
+function selecionarCliente() {
+    const clienteId = document.getElementById('clientes-lista').value;
+    if (!clienteId) {
+        alert('Selecione um cliente!');
+        return;
+    }
+    selecionarClienteAutomaticamente(clienteId);
+    fecharModalClientes();
+}
+
+function selecionarClienteAutomaticamente(clienteId) {
+    const cliente = todosClientes.find(c => c.id == clienteId);
+    if (cliente) {
+        document.getElementById('cliente-id').value = cliente.id;
+        document.getElementById('cliente-selecionado').textContent = `${cliente.nome} - ${cliente.telefone}`;
+    }
+}
+
 // Funções para agendamento
 async function carregarServicos() {
     const container = document.getElementById('servicos-checkboxes');
@@ -231,7 +302,6 @@ async function carregarServicos() {
         container.appendChild(label);
     });
 
-    // Preencher select de exclusão no modal
     const selectExcluir = document.getElementById('servico-excluir');
     selectExcluir.innerHTML = '<option value="">Selecione um serviço</option>';
     servicos.forEach(servico => {
@@ -250,19 +320,23 @@ function formatarDataParaSupabase(dataInput) {
 async function salvarAgendamento(event) {
     event.preventDefault();
     const editIndex = document.getElementById('edit-index').value;
-    const nome = document.getElementById('nome').value;
-    const telefone = document.getElementById('telefone').value;
+    const clienteId = document.getElementById('cliente-id').value;
     const dataInput = document.getElementById('data').value;
     const data = formatarDataParaSupabase(dataInput);
     const horario = document.getElementById('horario').value;
     const servicos = Array.from(document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]:checked')).map(cb => cb.value);
 
+    if (!clienteId) {
+        alert('Selecione ou cadastre um cliente!');
+        return;
+    }
     if (servicos.length === 0) {
         alert('Selecione pelo menos um serviço!');
         return;
     }
 
-    const agendamento = { nome, telefone, data, horario, servicos };
+    const cliente = todosClientes.find(c => c.id == clienteId);
+    const agendamento = { cliente_id: parseInt(clienteId), nome: cliente.nome, telefone: cliente.telefone, data, horario, servicos };
 
     try {
         if (editIndex === '') {
@@ -356,9 +430,11 @@ function fecharModal() {
 }
 
 function configurarModal() {
-    const modal = document.getElementById('modal-servico');
+    const modalServico = document.getElementById('modal-servico');
+    const modalClientes = document.getElementById('modal-clientes');
     window.onclick = function(event) {
-        if (event.target === modal) fecharModal();
+        if (event.target === modalServico) fecharModal();
+        if (event.target === modalClientes) fecharModalClientes();
     };
 }
 
@@ -367,6 +443,8 @@ function limparFormulario() {
     document.getElementById('edit-index').value = '';
     document.getElementById('form-title').textContent = 'Novo Agendamento';
     document.getElementById('btn-salvar').textContent = 'Salvar';
+    document.getElementById('cliente-id').value = '';
+    document.getElementById('cliente-selecionado').textContent = 'Nenhum cliente selecionado';
     document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
 }
 
