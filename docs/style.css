@@ -388,7 +388,7 @@ td .delete-btn:hover {
 
 /* Modal */
 .modal {
-    display: none; /* Começa escondido */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -401,7 +401,7 @@ td .delete-btn:hover {
 }
 
 .modal.active {
-    display: flex; /* Ativado apenas com a classe active */
+    display: flex;
 }
 
 .modal-content {
@@ -413,29 +413,101 @@ td .delete-btn:hover {
     max-width: 400px;
 }
 
-.close {
-    float: right;
-    font-size: 24px;
-    cursor: pointer;
-    color: #757575;
-}
-
-.modal-content h3 {
-    font-size: 18px;
-    font-weight: 500;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 16px;
 }
 
-.modal-content label {
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #212121;
+}
+
+.modal-header .close {
+    font-size: 24px;
+    color: #757575;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-header .close:hover {
+    color: #212121;
+}
+
+.modal-form label,
+.modal-body label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #212121;
+    margin-bottom: 8px;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-select:focus {
+    border-color: #6200EA;
+    outline: none;
+}
+
+.checkbox-list label {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px;
     font-size: 14px;
+    transition: background 0.3s;
 }
 
-.modal-content label:hover {
+.checkbox-list label:hover {
     background-color: #F5F5F5;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    background-color: #6200EA;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.modal-btn:hover {
+    background-color: #4500A0;
+    transform: translateY(-2px);
+}
+
+.modal-btn-delete {
+    background-color: #D81B60;
+}
+
+.modal-btn-delete:hover {
+    background-color: #B0003A;
+    transform: translateY(-2px);
+}
+
+.modal-footer {
+    margin-top: 16px;
+    text-align: right;
 }
 
 /* Login e Registro */
@@ -592,6 +664,28 @@ td .delete-btn:hover {
     .modal-content {
         width: 80%;
         max-width: 300px;
+        padding: 16px;
+    }
+
+    .modal-header h3 {
+        font-size: 16px;
+    }
+
+    .modal-form input,
+    .modal-form select,
+    .modal-select {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .modal-btn {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .checkbox-list label {
+        font-size: 12px;
+        padding: 6px;
     }
 
     .logo-img {

@@ -60,17 +60,19 @@
             <!-- Modal para adicionar/excluir serviço -->
             <div id="modal-servico" class="modal">
                 <div class="modal-content">
-                    <span class="close" onclick="fecharModal()">×</span>
-                    <h3 id="modal-title">Adicionar Novo Serviço</h3>
-                    <form id="form-novo-servico">
+                    <div class="modal-header">
+                        <h3 id="modal-title">Adicionar Novo Serviço</h3>
+                        <span class="close" onclick="fecharModal()">×</span>
+                    </div>
+                    <form id="form-novo-servico" class="modal-form">
                         <label for="novo-servico">Nome do Serviço:</label>
                         <input type="text" id="novo-servico" placeholder="Digite o nome do serviço" required>
-                        <button type="submit">Salvar</button>
+                        <button type="submit" class="modal-btn">Salvar</button>
                     </form>
-                    <form id="form-excluir-servico" style="margin-top: 16px;">
+                    <form id="form-excluir-servico" class="modal-form" style="display: none;">
                         <label for="servico-excluir">Serviço a Excluir:</label>
-                        <select id="servico-excluir"></select>
-                        <button type="submit">Excluir</button>
+                        <select id="servico-excluir" class="modal-select"></select>
+                        <button type="submit" class="modal-btn modal-btn-delete">Excluir</button>
                     </form>
                 </div>
             </div>
@@ -78,10 +80,16 @@
             <!-- Modal para selecionar serviços -->
             <div id="modal-selecionar-servicos" class="modal">
                 <div class="modal-content">
-                    <span class="close" onclick="fecharModalServicos()">×</span>
-                    <h3>Selecionar Serviços</h3>
-                    <div id="servicos-checkboxes"></div>
-                    <button type="button" onclick="fecharModalServicos()">Confirmar</button>
+                    <div class="modal-header">
+                        <h3>Selecionar Serviços</h3>
+                        <span class="close" onclick="fecharModalServicos()">×</span>
+                    </div>
+                    <div class="modal-body">
+                        <div id="servicos-checkboxes" class="checkbox-list"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn" onclick="fecharModalServicos()">Confirmar</button>
+                    </div>
                 </div>
             </div>
         </div>

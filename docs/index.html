@@ -97,9 +97,11 @@
         <!-- Modal para editar agendamento -->
         <div id="modal-editar-agendamento" class="modal">
             <div class="modal-content">
-                <span class="close" onclick="document.getElementById('modal-editar-agendamento').classList.remove('active')">×</span>
-                <h3>Editar Agendamento</h3>
-                <form id="form-editar-agendamento">
+                <div class="modal-header">
+                    <h3>Editar Agendamento</h3>
+                    <span class="close" onclick="document.getElementById('modal-editar-agendamento').classList.remove('active')">×</span>
+                </div>
+                <form id="form-editar-agendamento" class="modal-form">
                     <label for="edit-nome">Nome:</label>
                     <input type="text" id="edit-nome" required>
                     <label for="edit-telefone">Telefone:</label>
@@ -108,7 +110,7 @@
                     <input type="date" id="edit-data" required>
                     <label for="edit-horario">Horário:</label>
                     <input type="time" id="edit-horario" required>
-                    <button type="submit">Salvar</button>
+                    <button type="submit" class="modal-btn">Salvar</button>
                 </form>
             </div>
         </div>
