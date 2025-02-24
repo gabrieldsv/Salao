@@ -11,6 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 </head>
 <body>
+    <nav class="top-navbar">
+        <a href="index.html" class="nav-link">Voltar à Tela Inicial</a>
+    </nav>
     <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
     <div class="dashboard">
         <!-- Sidebar -->
@@ -47,10 +50,7 @@
                 <label for="horario">Horário:</label>
                 <input type="time" id="horario" required>
                 <label>Serviços:</label>
-                <div class="dropdown-container">
-                    <button type="button" class="dropdown-button" onclick="toggleDropdown()">Selecionar Serviços</button>
-                    <div id="servicos-dropdown" class="dropdown-content"></div>
-                </div>
+                <button type="button" class="dropdown-button" onclick="abrirModalServicos()">Selecionar Serviços</button>
                 <input type="hidden" id="edit-index">
                 <button type="button" id="btn-adicionar-servico">➕ Adicionar Serviço</button>
                 <button type="button" id="btn-excluir-servico">🗑️ Excluir Serviço</button>
@@ -72,6 +72,16 @@
                         <select id="servico-excluir"></select>
                         <button type="submit">Excluir</button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Modal para selecionar serviços -->
+            <div id="modal-selecionar-servicos" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="fecharModalServicos()">×</span>
+                    <h3>Selecionar Serviços</h3>
+                    <div id="servicos-checkboxes"></div>
+                    <button type="button" onclick="fecharModalServicos()">Confirmar</button>
                 </div>
             </div>
         </div>

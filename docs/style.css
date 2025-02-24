@@ -11,6 +11,33 @@ body {
     background-color: #FAFAFA;
     color: #212121;
     line-height: 1.6;
+    padding-top: 60px; /* Espaçamento para a navbar fixa */
+}
+
+/* Navbar superior */
+.top-navbar {
+    background-color: #6200EA;
+    padding: 12px 24px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1200;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Dashboard */
@@ -37,7 +64,7 @@ body {
 }
 
 .logo-img {
-    max-width: 100%; /* Garante que o logo se ajuste à largura da sidebar */
+    max-width: 100%;
     height: auto;
     display: block;
 }
@@ -72,7 +99,7 @@ body {
 .sidebar-toggle {
     display: none;
     position: fixed;
-    top: 16px;
+    top: 72px; /* Ajustado para ficar abaixo da navbar */
     left: 16px;
     background-color: #6200EA;
     color: #FFFFFF;
@@ -298,12 +325,7 @@ td .delete-btn:hover {
     outline: none;
 }
 
-/* Dropdown de serviços */
-.dropdown-container {
-    position: relative;
-    margin-bottom: 16px;
-}
-
+/* Botão de serviços */
 .dropdown-button {
     width: 100%;
     padding: 12px;
@@ -314,39 +336,12 @@ td .delete-btn:hover {
     font-size: 14px;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
 }
 
 .dropdown-button:focus {
     border-color: #6200EA;
     outline: none;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 8px;
-    z-index: 1000;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.dropdown-content label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    font-size: 14px;
-}
-
-.dropdown-content label:hover {
-    background-color: #F5F5F5;
 }
 
 /* Botões do formulário */
@@ -393,16 +388,20 @@ td .delete-btn:hover {
 
 /* Modal */
 .modal {
-    display: none;
+    display: none; /* Começa escondido */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+}
+
+.modal.active {
+    display: flex; /* Ativado apenas com a classe active */
 }
 
 .modal-content {
@@ -412,11 +411,6 @@ td .delete-btn:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 400px;
-    margin: auto;
-    position: relative;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    left: 50%;
 }
 
 .close {
@@ -430,6 +424,18 @@ td .delete-btn:hover {
     font-size: 18px;
     font-weight: 500;
     margin-bottom: 16px;
+}
+
+.modal-content label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.modal-content label:hover {
+    background-color: #F5F5F5;
 }
 
 /* Login e Registro */
@@ -589,6 +595,6 @@ td .delete-btn:hover {
     }
 
     .logo-img {
-        max-width: 150px; /* Reduz o tamanho do logo em telas pequenas */
+        max-width: 150px;
     }
 }

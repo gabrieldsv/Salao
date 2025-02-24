@@ -10,6 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <nav class="top-navbar">
+        <a href="index.html" class="nav-link">Voltar à Tela Inicial</a>
+    </nav>
     <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
     <div class="dashboard" id="dashboard">
         <!-- Sidebar -->
@@ -88,6 +91,25 @@
                     </thead>
                     <tbody id="agendamentos-tbody"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Modal para editar agendamento -->
+        <div id="modal-editar-agendamento" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="document.getElementById('modal-editar-agendamento').style.display='none'">×</span>
+                <h3>Editar Agendamento</h3>
+                <form id="form-editar-agendamento">
+                    <label for="edit-nome">Nome:</label>
+                    <input type="text" id="edit-nome" required>
+                    <label for="edit-telefone">Telefone:</label>
+                    <input type="text" id="edit-telefone" required>
+                    <label for="edit-data">Data:</label>
+                    <input type="date" id="edit-data" required>
+                    <label for="edit-horario">Horário:</label>
+                    <input type="time" id="edit-horario" required>
+                    <button type="submit">Salvar</button>
+                </form>
             </div>
         </div>
     </div>

@@ -1,7 +1,8 @@
-// Declare o supabaseClient globalmente
+// Declare o supabaseClient e outras variáveis globalmente
 let supabaseClient;
 let todosAgendamentos = [];
 let todosServicos = [];
+let servicosChartInstance = null; // Armazena a instância do gráfico
 
 window.onload = function() {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -38,23 +39,49 @@ async function checkUserSession() {
     }
 }
 
-// Função para carregar o dashboard
+// Função para carregar o dashboard com retry apenas para o Supabase
 async function carregarDashboard() {
-    try {
-        const { data: agendamentos, error } = await supabaseClient.from('agendamentos').select('*');
-        if (error) throw error;
+    let tentativas = 0;
+    const maxTentativas = 3;
+    let agendamentos;
 
-        todosAgendamentos = agendamentos;
-        atualizarCards(agendamentos);
-        atualizarGraficos(agendamentos);
-        filtrarTabela();
-    } catch (error) {
-        console.error('Erro ao carregar dashboard:', error.message);
-        alert('Erro ao carregar dashboard.');
+    // Tenta carregar os dados do Supabase
+    while (tentativas < maxTentativas) {
+        try {
+            console.log(`Tentativa ${tentativas + 1} de carregar os agendamentos...`);
+            const { data, error } = await supabaseClient.from('agendamentos').select('*');
+            if (error) {
+                console.error('Erro retornado pelo Supabase:', error);
+                throw error;
+            }
+            console.log('Agendamentos carregados com sucesso:', data);
+            agendamentos = data || []; // Garante que não seja null
+            break; // Sai do loop se sucesso
+        } catch (error) {
+            tentativas++;
+            console.error(`Tentativa ${tentativas} falhou:`, error.message);
+            if (tentativas === maxTentativas) {
+                console.error('Todas as tentativas falharam. Detalhes do erro:', error);
+                alert('Erro persistente ao carregar os agendamentos do Supabase. Verifique o console e tente novamente mais tarde.');
+                agendamentos = []; // Usa array vazio como fallback
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1s
+        }
     }
+
+    // Atualiza os dados mesmo que o gráfico falhe
+    todosAgendamentos = agendamentos;
+    atualizarCards(todosAgendamentos);
+    try {
+        atualizarGraficos(todosAgendamentos);
+    } catch (error) {
+        console.error('Erro ao atualizar o gráfico:', error.message);
+        alert('Erro ao renderizar o gráfico. Os dados foram carregados, mas o gráfico não pôde ser exibido.');
+    }
+    filtrarTabela();
 }
 
-// Função para atualizar os cards (sem filtros)
+// Função para atualizar os cards
 function atualizarCards(agendamentos) {
     const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const amanha = new Date();
@@ -82,7 +109,7 @@ function atualizarCards(agendamentos) {
     document.getElementById('agendamentos-mes').textContent = agendamentosMes.length;
 }
 
-// Função para atualizar os gráficos (apenas Serviços Populares)
+// Função para atualizar os gráficos, destruindo o anterior se existir
 function atualizarGraficos(agendamentos) {
     const servicos = {};
     agendamentos.forEach(a => a.servicos.forEach(s => servicos[s] = (servicos[s] || 0) + 1));
@@ -90,7 +117,15 @@ function atualizarGraficos(agendamentos) {
     const servicosData = Object.values(servicos);
 
     const servicosCtx = document.getElementById('servicosChart').getContext('2d');
-    new Chart(servicosCtx, {
+
+    // Destroi o gráfico anterior, se existir
+    if (servicosChartInstance) {
+        servicosChartInstance.destroy();
+        console.log('Gráfico anterior destruído.');
+    }
+
+    // Cria um novo gráfico
+    servicosChartInstance = new Chart(servicosCtx, {
         type: 'bar',
         data: {
             labels: servicosLabels,
@@ -104,6 +139,7 @@ function atualizarGraficos(agendamentos) {
         },
         options: { scales: { y: { beginAtZero: true } } }
     });
+    console.log('Novo gráfico criado com sucesso.');
 }
 
 // Função para formatar data para comparação
@@ -177,14 +213,14 @@ function filtrarTabela() {
 
 // Funções para agendamento
 async function carregarServicos() {
-    const dropdown = document.getElementById('servicos-dropdown');
+    const container = document.getElementById('servicos-checkboxes');
     const { data: servicos, error } = await supabaseClient.from('servicos').select('*');
     if (error) {
         console.error('Erro ao carregar serviços:', error.message);
         return;
     }
     todosServicos = servicos;
-    dropdown.innerHTML = '';
+    container.innerHTML = '';
     servicos.forEach(servico => {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
@@ -192,7 +228,7 @@ async function carregarServicos() {
         checkbox.value = servico.nome;
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(servico.nome));
-        dropdown.appendChild(label);
+        container.appendChild(label);
     });
 
     // Preencher select de exclusão no modal
@@ -219,7 +255,7 @@ async function salvarAgendamento(event) {
     const dataInput = document.getElementById('data').value;
     const data = formatarDataParaSupabase(dataInput);
     const horario = document.getElementById('horario').value;
-    const servicos = Array.from(document.querySelectorAll('#servicos-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+    const servicos = Array.from(document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]:checked')).map(cb => cb.value);
 
     if (servicos.length === 0) {
         alert('Selecione pelo menos um serviço!');
@@ -289,9 +325,12 @@ async function excluirServico(event) {
     }
 }
 
-function toggleDropdown() {
-    const dropdown = document.getElementById('servicos-dropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+function abrirModalServicos() {
+    document.getElementById('modal-selecionar-servicos').classList.add('active');
+}
+
+function fecharModalServicos() {
+    document.getElementById('modal-selecionar-servicos').classList.remove('active');
 }
 
 function abrirModal(mode) {
@@ -309,11 +348,11 @@ function abrirModal(mode) {
         formAdd.style.display = 'none';
         formDelete.style.display = 'block';
     }
-    modal.style.display = 'block';
+    modal.classList.add('active');
 }
 
 function fecharModal() {
-    document.getElementById('modal-servico').style.display = 'none';
+    document.getElementById('modal-servico').classList.remove('active');
 }
 
 function configurarModal() {
@@ -328,7 +367,7 @@ function limparFormulario() {
     document.getElementById('edit-index').value = '';
     document.getElementById('form-title').textContent = 'Novo Agendamento';
     document.getElementById('btn-salvar').textContent = 'Salvar';
-    document.querySelectorAll('#servicos-dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('#servicos-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
 }
 
 async function editarAgendamento(id) {
@@ -336,19 +375,31 @@ async function editarAgendamento(id) {
         const { data: agendamento, error } = await supabaseClient.from('agendamentos').select('*').eq('id', id).single();
         if (error) throw error;
 
-        document.getElementById('edit-index').value = id;
-        document.getElementById('nome').value = agendamento.nome;
-        document.getElementById('telefone').value = agendamento.telefone;
+        document.getElementById('edit-nome').value = agendamento.nome;
+        document.getElementById('edit-telefone').value = agendamento.telefone;
         const dataFormatted = agendamento.data.split('/').reverse().join('-');
-        document.getElementById('data').value = dataFormatted;
-        document.getElementById('horario').value = agendamento.horario;
+        document.getElementById('edit-data').value = dataFormatted;
+        document.getElementById('edit-horario').value = agendamento.horario;
 
-        const checkboxes = document.querySelectorAll('#servicos-dropdown input[type="checkbox"]');
-        checkboxes.forEach(cb => cb.checked = agendamento.servicos.includes(cb.value));
+        const modal = document.getElementById('modal-editar-agendamento');
+        modal.classList.add('active');
 
-        document.getElementById('form-title').textContent = 'Editar Agendamento';
-        document.getElementById('btn-salvar').textContent = 'Atualizar';
-        window.location.href = 'agendar.html';
+        document.getElementById('form-editar-agendamento').onsubmit = async function(event) {
+            event.preventDefault();
+            const nome = document.getElementById('edit-nome').value;
+            const telefone = document.getElementById('edit-telefone').value;
+            const dataInput = document.getElementById('edit-data').value;
+            const data = formatarDataParaSupabase(dataInput);
+            const horario = document.getElementById('edit-horario').value;
+
+            const { error } = await supabaseClient.from('agendamentos').update({ nome, telefone, data, horario }).eq('id', id);
+            if (error) throw error;
+
+            alert('Agendamento atualizado com sucesso!');
+            modal.classList.remove('active');
+            if (window.location.pathname.includes('index.html')) carregarDashboard();
+            else if (window.location.pathname.includes('detalhes.html')) carregarDetalhes();
+        };
     } catch (error) {
         console.error('Erro ao editar agendamento:', error.message);
         alert('Erro ao editar agendamento.');
