@@ -466,6 +466,86 @@ td .delete-btn:hover {
     outline: none;
 }
 
+/* Ajuste para o modal de selecionar serviços (compacto e com rolagem) */
+#modal-selecionar-servicos {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 250px; /* Reduzido para ficar mais compacto */
+    max-height: 350px; /* Altura máxima reduzida para evitar ser muito comprido */
+    z-index: 2000;
+    display: none;
+}
+
+#modal-selecionar-servicos.active {
+    display: block;
+}
+
+#modal-selecionar-servicos .modal-header {
+    background: #6200EA; /* Cor roxa para combinar com o tema */
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    text-align: center;
+    font-size: 16px;
+}
+
+#modal-selecionar-servicos .close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    color: white;
+}
+
+#modal-selecionar-servicos .modal-body {
+    padding: 10px;
+}
+
+#servicos-checkboxes {
+    max-height: 250px; /* Altura máxima reduzida para rolagem */
+    overflow-y: auto; /* Ativa a barra de rolagem vertical */
+    padding: 5px;
+}
+
+#servicos-checkboxes label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px; /* Espaço reduzido entre os itens */
+    font-size: 14px; /* Texto menor para caber melhor */
+}
+
+#servicos-checkboxes input[type="checkbox"] {
+    margin-right: 8px; /* Espaço reduzido ao lado do checkbox */
+}
+
+#modal-selecionar-servicos .modal-footer {
+    padding: 10px;
+    text-align: center;
+    background: #f9f9f9;
+    border-radius: 0 0 10px 10px;
+}
+
+#modal-selecionar-servicos .modal-btn {
+    background-color: #6200EA;
+    color: white;
+    padding: 6px 12px; /* Botão menor */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#modal-selecionar-servicos .modal-btn:hover {
+    background-color: #4500A0;
+    transform: translateY(-2px);
+}
+
 .checkbox-list label {
     display: flex;
     align-items: center;
@@ -477,37 +557,6 @@ td .delete-btn:hover {
 
 .checkbox-list label:hover {
     background-color: #F5F5F5;
-}
-
-.modal-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 14px;
-    background-color: #6200EA;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.modal-btn:hover {
-    background-color: #4500A0;
-    transform: translateY(-2px);
-}
-
-.modal-btn-delete {
-    background-color: #D81B60;
-}
-
-.modal-btn-delete:hover {
-    background-color: #B0003A;
-    transform: translateY(-2px);
-}
-
-.modal-footer {
-    margin-top: 16px;
-    text-align: right;
 }
 
 /* Login e Registro */
@@ -709,5 +758,15 @@ td .delete-btn:hover {
 
     .logo-img {
         max-width: 150px;
+    }
+
+    /* Ajuste para o modal de serviços em telas menores */
+    #modal-selecionar-servicos {
+        width: 200px; /* Reduzido ainda mais em telas pequenas */
+        max-height: 300px;
+    }
+
+    #servicos-checkboxes {
+        max-height: 200px; /* Altura máxima reduzida em telas pequenas */
     }
 }
