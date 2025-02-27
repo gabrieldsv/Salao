@@ -9,6 +9,84 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+        /* Estilo para o modal de selecionar serviços (quadrado com rolagem) */
+        #modal-selecionar-servicos {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px; /* Largura fixa para um formato mais quadrado */
+            max-height: 400px; /* Altura máxima para rolagem */
+            z-index: 1000;
+            display: none; /* Inicialmente oculto */
+        }
+
+        #modal-selecionar-servicos.show {
+            display: block;
+        }
+
+        #modal-selecionar-servicos .modal-header {
+            background: #4a148c; /* Cor roxa para combinar com o tema */
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        #modal-selecionar-servicos .close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+        }
+
+        #modal-selecionar-servicos .modal-body {
+            padding: 15px;
+        }
+
+        #servicos-checkboxes {
+            max-height: 300px; /* Altura máxima para rolagem dentro do modal */
+            overflow-y: auto; /* Ativa a barra de rolagem vertical */
+        }
+
+        #servicos-checkboxes label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #servicos-checkboxes input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        #modal-selecionar-servicos .modal-footer {
+            padding: 10px;
+            text-align: center;
+            background: #f9f9f9;
+            border-radius: 0 0 10px 10px;
+        }
+
+        #modal-selecionar-servicos .modal-btn {
+            background-color: #4a148c;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #modal-selecionar-servicos .modal-btn:hover {
+            background-color: #6a1b9a;
+        }
+    </style>
 </head>
 <body>
     <nav class="top-navbar">
@@ -108,7 +186,7 @@
                 </div>
             </div>
 
-            <!-- Modal para selecionar serviços -->
+            <!-- Modal para selecionar serviços (ajustado para ser quadrado com rolagem) -->
             <div id="modal-selecionar-servicos" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
